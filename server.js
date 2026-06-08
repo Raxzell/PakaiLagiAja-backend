@@ -8,7 +8,12 @@ const db = require('./database');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: '*', // Atau ganti sama link vercel lu, misal: 'https://pakai-lagi-aja.vercel.app'
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // <--- Pastikan DELETE ada di sini!
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 // Tetap simpan ini buat foto lama yang sudah terlanjur di-upload ke folder lokal
