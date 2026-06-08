@@ -4,27 +4,24 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 dotenv.config();
-const db = require('./database'); // import database.js
+const db = require('./database');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
+
+// Tetap simpan ini buat foto lama yang sudah terlanjur di-upload ke folder lokal
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes (nanti kita isi)
+// Routes
 const authRoutes = require('./routes/auth');
 const barangRoutes = require('./routes/barang');
+const transaksiRoutes = require('./routes/transaksi');
+
 app.use('/api/auth', authRoutes);
 app.use('/api/barang', barangRoutes);
-
-// Jalankan server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server jalan di http://localhost:${PORT}`);
-});
-
-
-const transaksiRoutes = require('./routes/transaksi');
 app.use('/api/transaksi', transaksiRoutes);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server jalan di port ${PORT}`));
