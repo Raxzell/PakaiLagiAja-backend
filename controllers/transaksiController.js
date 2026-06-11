@@ -23,7 +23,6 @@ const ajukanPinjam = (req, res) => {
       [barang_id, peminjam_id, 'Menunggu', new Date(), catatan_peminjam || null, tanggal_ambil || null, tanggal_kembali_rencana || null],
       (err, result) => {
         if (err) {
-          // Fallback jika kolom baru belum ada
           db.query(
             'INSERT INTO transaksi (barang_id, peminjam_id, status, tanggal_pinjam) VALUES (?, ?, ?, ?)',
             [barang_id, peminjam_id, 'Menunggu', new Date()],
@@ -132,7 +131,6 @@ const tolakPinjam = (req, res) => {
     ['Ditolak', transaksi_id],
     (err) => {
       if (err) return res.status(500).json({ message: 'Gagal tolak pinjaman' });
-      // Balik status barang jadi Tersedia
       db.query('UPDATE barang SET status = ? WHERE id = ?', ['Tersedia', barang_id]);
       res.json({ message: 'Pinjaman ditolak!' });
     }
