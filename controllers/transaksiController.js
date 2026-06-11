@@ -139,54 +139,55 @@ const tolakPinjam = (req, res) => {
   );
 };
 
-// AMBIL NOTIFIKASI PEMILIK (permintaan pinjam masuk)
+// AMBIL NOTIFIKASI PEMILIK
 const getNotifikasiPemilik = (req, res) => {
   const { user_id } = req.params;
 
-  // Query dengan explicit column selection + fallback NULL untuk kolom yang mungkin belum ada
-  const query = `SELECT 
-     transaksi.id, transaksi.barang_id, transaksi.peminjam_id, transaksi.status,
-     transaksi.tanggal_pinjam, transaksi.tanggal_kembali, transaksi.rating, transaksi.created_at,
-     barang.nama as nama_barang, 
-     users.nama as nama_peminjam,
-     users.nomor_telepon as nomor_peminjam,
-     pemilik.nomor_telepon as nomor_pemilik
-     FROM transaksi 
-     LEFT JOIN barang ON transaksi.barang_id = barang.id 
-     LEFT JOIN users ON transaksi.peminjam_id = users.id 
-     LEFT JOIN users pemilik ON barang.user_id = pemilik.id
-     WHERE barang.user_id = ? 
-     ORDER BY transaksi.created_at DESC`;
+  const query = `
+    SELECT 
+      transaksi.id,
+      transaksi.barang_id,
+      transaksi.peminjam_id,
+      transaksi.status,
+      transaksi.tanggal_pinjam,
+      transaksi.tanggal_kembali,
+      transaksi.rating,
+      transaksi.created_at,
+      transaksi.catatan_peminjam,
+      transaksi.tanggal_ambil,
+      transaksi.tanggal_kembali_rencana,
+      barang.nama AS nama_barang,
+      users.nama AS nama_peminjam,
+      users.nomor_telepon AS nomor_peminjam,
+      pemilik.nomor_telepon AS nomor_pemilik
+    FROM transaksi
+    LEFT JOIN barang 
+      ON transaksi.barang_id = barang.id
+    LEFT JOIN users 
+      ON transaksi.peminjam_id = users.id
+    LEFT JOIN users pemilik 
+      ON barang.user_id = pemilik.id
+    WHERE barang.user_id = ?
+    ORDER BY transaksi.created_at DESC
+  `;
 
   db.query(query, [user_id], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Gagal ambil notifikasi', error: err.message });
+    if (err) {
+      return res.status(500).json({
+        message: 'Gagal ambil notifikasi',
+        error: err.message
+      });
+    }
 
-    // Coba ambil kolom catatan & jadwal secara terpisah jika ada
-    const queryExtra = `SELECT id,
-       IFNULL(catatan_peminjam, NULL) as catatan_peminjam,
-       IFNULL(tanggal_ambil, NULL) as tanggal_ambil,
-       IFNULL(tanggal_kembali_rencana, NULL) as tanggal_kembali_rencana
-       FROM transaksi WHERE barang_id IN (
-         SELECT id FROM barang WHERE user_id = ?
-       )`;
-
-    db.query(queryExtra, [user_id], (err2, extraResults) => {
-      if (err2) {
-        // Kolom belum ada, tetap kembalikan hasil tanpa extra data
-        return res.json(results);
-      }
-      // Merge extra data ke results
-      const extraMap = {};
-      extraResults.forEach(e => { extraMap[e.id] = e; });
-      const merged = results.map(r => ({
-        ...r,
-        catatan_peminjam: extraMap[r.id]?.catatan_peminjam || null,
-        tanggal_ambil: extraMap[r.id]?.tanggal_ambil || null,
-        tanggal_kembali_rencana: extraMap[r.id]?.tanggal_kembali_rencana || null
-      }));
-      res.json(merged);
-    });
+    res.json(results);
   });
 };
 
-module.exports = { ajukanPinjam, getTransaksiUser, kembalikanBarang, setujuiPinjam, tolakPinjam, getNotifikasiPemilik };
+module.exports = { 
+  ajukanPinjam, 
+  getTransaksiUser, 
+  kembalikanBarang, 
+  setujuiPinjam, 
+  tolakPinjam, 
+  getNotifikasiPemilik 
+};
