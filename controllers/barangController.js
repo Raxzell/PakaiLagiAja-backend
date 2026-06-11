@@ -109,7 +109,7 @@ const getLifecycleBarang = (req, res) => {
      FROM barang
      LEFT JOIN transaksi 
        ON barang.id = transaksi.barang_id 
-       AND transaksi.status != 'Ditolak'
+       AND transaksi.status IN ('Disetujui', 'Dikembalikan')
      LEFT JOIN users 
        ON transaksi.peminjam_id = users.id
      WHERE barang.id = ?
