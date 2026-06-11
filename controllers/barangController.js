@@ -3,18 +3,14 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// ==============================
 // KONFIGURASI CLOUDINARY
-// ==============================
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// ==============================
 // SETUP UPLOAD FOTO KE CLOUDINARY
-// ==============================
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -25,9 +21,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-// ==============================
 // TAMBAH BARANG
-// ==============================
 const tambahBarang = (req, res) => {
   const { nama, kategori, jenis, kondisi, deskripsi, user_id } = req.body;
 
@@ -53,9 +47,7 @@ const tambahBarang = (req, res) => {
   );
 };
 
-// ==============================
 // AMBIL SEMUA BARANG
-// ==============================
 const getBarang = (req, res) => {
   db.query(
     'SELECT barang.*, users.nama as nama_pemilik FROM barang LEFT JOIN users ON barang.user_id = users.id ORDER BY barang.created_at DESC',
@@ -72,9 +64,7 @@ const getBarang = (req, res) => {
   );
 };
 
-// ==============================
 // AMBIL BARANG MILIK USER
-// ==============================
 const getBarangUser = (req, res) => {
   const { user_id } = req.params;
 
@@ -94,9 +84,7 @@ const getBarangUser = (req, res) => {
   );
 };
 
-// ==============================
 // AMBIL LIFECYCLE BARANG
-// ==============================
 const getLifecycleBarang = (req, res) => {
   const { barang_id } = req.params;
 
@@ -128,9 +116,7 @@ const getLifecycleBarang = (req, res) => {
   );
 };
 
-// ==============================
 // AMBIL BARANG GRATIS
-// ==============================
 const ambilGratis = (req, res) => {
   const { barang_id, user_id } = req.body;
 
@@ -187,9 +173,7 @@ const ambilGratis = (req, res) => {
   });
 };
 
-// ==============================
 // HAPUS BARANG
-// ==============================
 const hapusBarang = (req, res) => {
   const { barang_id, user_id } = req.body;
 
@@ -246,9 +230,7 @@ const hapusBarang = (req, res) => {
   });
 };
 
-// ==============================
 // EXPORT
-// ==============================
 module.exports = {
   upload,
   tambahBarang,
