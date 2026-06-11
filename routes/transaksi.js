@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-// const { ajukanPinjam, getTransaksiUser, kembalikanBarang } = require('../controllers/transaksiController');
 const { ajukanPinjam, getTransaksiUser, kembalikanBarang, setujuiPinjam, tolakPinjam, getNotifikasiPemilik } = require('../controllers/transaksiController');
 
 router.post('/', ajukanPinjam);
