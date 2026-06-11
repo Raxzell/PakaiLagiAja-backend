@@ -7,31 +7,43 @@ const register = (req, res) => {
 
   // Cek apakah email sudah terdaftar
   db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Server error' });
-    if (results.length > 0) return res.status(400).json({ message: 'Email sudah terdaftar' });
+    if (err) {
+      return res.status(500).json({
+        message: 'Server error',
+        error: err.message
+      });
+    }
+
+    if (results.length > 0) {
+      return res.status(400).json({
+        message: 'Email sudah terdaftar'
+      });
+    }
 
     // Enkripsi password
     bcrypt.hash(password, 10, (err, hashedPassword) => {
-      if (err) return res.status(500).json({ message: 'Gagal enkripsi password' });
+      if (err) {
+        return res.status(500).json({
+          message: 'Gagal enkripsi password',
+          error: err.message
+        });
+      }
 
-      // Simpan user baru ke database (dengan nomor_telepon jika ada kolom)
+      // Simpan user baru ke database
       db.query(
-        'INSERT INTO users (nama, email, password, role, nomor_telepon) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO users (nama, email, password, nomor_telepon) VALUES (?, ?, ?, ?)',
         [nama, email, hashedPassword, nomor_telepon || null],
         (err, result) => {
           if (err) {
-            // Fallback jika kolom nomor_telepon belum ada
-            db.query(
-              'INSERT INTO users (nama, email, password, role) VALUES (?, ?, ?, ?)',
-              [nama, email, hashedPassword, role || 'donatur'],
-              (err2, result2) => {
-                if (err2) return res.status(500).json({ message: 'Gagal register' });
-                res.status(201).json({ message: 'Register berhasil!' });
-              }
-            );
-            return;
+            return res.status(500).json({
+              message: 'Gagal register',
+              error: err.message
+            });
           }
-          res.status(201).json({ message: 'Register berhasil!' });
+
+          res.status(201).json({
+            message: 'Register berhasil!'
+          });
         }
       );
     });
@@ -44,15 +56,35 @@ const login = (req, res) => {
 
   // Cari user berdasarkan email
   db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Server error' });
-    if (results.length === 0) return res.status(400).json({ message: 'Email tidak ditemukan' });
+    if (err) {
+      return res.status(500).json({
+        message: 'Server error',
+        error: err.message
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(400).json({
+        message: 'Email tidak ditemukan'
+      });
+    }
 
     const user = results[0];
 
     // Bandingkan password dengan yang di database
     bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (err) return res.status(500).json({ message: 'Server error' });
-      if (!isMatch) return res.status(400).json({ message: 'Password salah' });
+      if (err) {
+        return res.status(500).json({
+          message: 'Server error',
+          error: err.message
+        });
+      }
+
+      if (!isMatch) {
+        return res.status(400).json({
+          message: 'Password salah'
+        });
+      }
 
       res.json({
         message: 'Login berhasil!',
@@ -67,15 +99,24 @@ const login = (req, res) => {
   });
 };
 
+// TOTAL USERS
 const getTotalUsers = (req, res) => {
   db.query('SELECT COUNT(*) AS total FROM users', (err, results) => {
     if (err) {
-      return res.status(500).json({ message: 'Gagal hitung user', error: err.message });
+      return res.status(500).json({
+        message: 'Gagal hitung user',
+        error: err.message
+      });
     }
-    // Mengembalikan angka total user asli dari hasil query database
-    res.json({ total: results[0].total });
+
+    res.json({
+      total: results[0].total
+    });
   });
 };
 
-
-module.exports = { register, login, getTotalUsers };
+module.exports = {
+  register,
+  login,
+  getTotalUsers
+};
